@@ -9,7 +9,6 @@ import (
 
 	"github.com/ElizCarvalho/fc-pos-golang-lab-leilao/internal/entity/auction_entity"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -19,16 +18,24 @@ func setupTestDatabase(t *testing.T) (*mongo.Database, func()) {
 	ctx := context.Background()
 
 	// Configura as variáveis de ambiente para teste
-	os.Setenv("MONGODB_URL", "mongodb://localhost:27017")
+	mongoURL := os.Getenv("MONGODB_URL")
+	if mongoURL == "" {
+		mongoURL = "mongodb://localhost:27018" // Porta padrão para testes
+	}
+	os.Setenv("MONGODB_URL", mongoURL)
 	os.Setenv("MONGODB_DB", fmt.Sprintf("test_auctions_%d", time.Now().UnixNano()))
 
 	// Conecta ao MongoDB
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
-	require.NoError(t, err, "Failed to connect to MongoDB")
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoURL))
+	if err != nil {
+		t.Fatalf("Failed to connect to MongoDB: %v", err)
+	}
 
 	// Faz ping para verificar conexão
 	err = client.Ping(ctx, nil)
-	require.NoError(t, err, "Failed to ping MongoDB")
+	if err != nil {
+		t.Fatalf("Failed to ping MongoDB: %v", err)
+	}
 
 	database := client.Database(os.Getenv("MONGODB_DB"))
 
@@ -77,16 +84,22 @@ func TestAutoCloseIntegration(t *testing.T) {
 			"Test Description for Integration Test",
 			auction_entity.New,
 		)
-		require.NoError(t, err, "Failed to create auction entity")
+		if err != nil {
+			t.Fatalf("Failed to create auction entity: %v", err)
+		}
 		assert.Equal(t, auction_entity.Active, auction.Status, "Auction should start as Active")
 
 		// 2. Insere o leilão no banco (isso inicia a goroutine automaticamente)
 		err = repo.CreateAuction(ctx, auction)
-		require.NoError(t, err, "Failed to create auction in database")
+		if err != nil {
+			t.Fatalf("Failed to create auction in database: %v", err)
+		}
 
 		// 3. Verifica se o leilão foi criado com status Active
 		foundAuction, err := repo.FindAuctionById(ctx, auction.Id)
-		require.NoError(t, err, "Failed to find auction by ID")
+		if err != nil {
+			t.Fatalf("Failed to find auction by ID: %v", err)
+		}
 		assert.Equal(t, auction_entity.Active, foundAuction.Status, "Auction should be Active after creation")
 
 		// 4. Aguarda o fechamento automático (duração + margem de segurança)
@@ -96,7 +109,9 @@ func TestAutoCloseIntegration(t *testing.T) {
 
 		// 5. Verifica se o leilão foi fechado automaticamente
 		closedAuction, err := repo.FindAuctionById(ctx, auction.Id)
-		require.NoError(t, err, "Failed to find auction after auto-close")
+		if err != nil {
+			t.Fatalf("Failed to find auction after auto-close: %v", err)
+		}
 		assert.Equal(t, auction_entity.Completed, closedAuction.Status, "Auction should be Completed after auto-close")
 
 		t.Logf("✅ Auction %s was automatically closed from %d to %d",
@@ -115,12 +130,16 @@ func TestAutoCloseIntegration(t *testing.T) {
 				fmt.Sprintf("Test Description %d", i+1),
 				auction_entity.New,
 			)
-			require.NoError(t, err)
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
 			auctions[i] = auction
 
 			// Insere no banco
 			err = repo.CreateAuction(ctx, auction)
-			require.NoError(t, err)
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
 		}
 
 		// Aguarda o fechamento automático
@@ -129,7 +148,9 @@ func TestAutoCloseIntegration(t *testing.T) {
 		// Verifica se todos foram fechados
 		for i, auction := range auctions {
 			closedAuction, err := repo.FindAuctionById(ctx, auction.Id)
-			require.NoError(t, err, "Failed to find auction %d", i+1)
+			if err != nil {
+				t.Fatalf("Failed to find auction %d: %v", i+1, err)
+			}
 			assert.Equal(t, auction_entity.Completed, closedAuction.Status,
 				"Auction %d should be Completed", i+1)
 		}
@@ -145,18 +166,24 @@ func TestAutoCloseIntegration(t *testing.T) {
 			"Test Description for Bid Validation",
 			auction_entity.New,
 		)
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
 
 		// Insere o leilão
 		err = repo.CreateAuction(ctx, auction)
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
 
 		// Aguarda o fechamento automático
 		time.Sleep(3 * time.Second)
 
 		// Verifica se o leilão está fechado
 		closedAuction, err := repo.FindAuctionById(ctx, auction.Id)
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
 		assert.Equal(t, auction_entity.Completed, closedAuction.Status,
 			"Auction should be closed before bid validation test")
 
@@ -289,7 +316,9 @@ func createConcurrentAuctions(t *testing.T, repo *AuctionRepository, ctx context
 	// Aguarda a criação de todos os leilões
 	for i := 0; i < numAuctions; i++ {
 		err := <-errors
-		require.NoError(t, err, "Failed to create auction %d", i+1)
+		if err != nil {
+			t.Fatalf("Failed to create auction %d: %v", i+1, err)
+		}
 	}
 
 	return auctions
@@ -299,7 +328,9 @@ func createConcurrentAuctions(t *testing.T, repo *AuctionRepository, ctx context
 func verifyAuctionsClosed(t *testing.T, repo *AuctionRepository, ctx context.Context, auctions []*auction_entity.Auction) {
 	for i, auction := range auctions {
 		closedAuction, err := repo.FindAuctionById(ctx, auction.Id)
-		require.NoError(t, err, "Failed to find auction %d", i+1)
+		if err != nil {
+			t.Fatalf("Failed to find auction %d: %v", i+1, err)
+		}
 		assert.Equal(t, auction_entity.Completed, closedAuction.Status,
 			"Auction %d should be Completed", i+1)
 	}
@@ -400,10 +431,14 @@ func TestAutoClosePerformance(t *testing.T) {
 				fmt.Sprintf("Performance Description %d", i+1),
 				auction_entity.New,
 			)
-			require.NoError(t, err)
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
 
 			err = repo.CreateAuction(ctx, auction)
-			require.NoError(t, err)
+			if err != nil {
+				t.Fatalf("Unexpected error: %v", err)
+			}
 		}
 
 		creationTime := time.Since(startTime)
@@ -414,7 +449,9 @@ func TestAutoClosePerformance(t *testing.T) {
 
 		// Verifica se todos foram fechados
 		auctions, err := repo.FindAuctions(ctx, auction_entity.Completed, "", "")
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
 		closedCount := len(auctions)
 
 		t.Logf("✅ Performance test completed: %d auctions processed", closedCount)
@@ -452,17 +489,23 @@ func TestAutoCloseErrorHandling(t *testing.T) {
 			"Test Description for Error Handling",
 			auction_entity.New,
 		)
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
 
 		// Insere o leilão (deve usar valor padrão para duração)
 		err = repo.CreateAuction(ctx, auction)
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
 
 		// Aguarda o fechamento automático (usando duração padrão de 5 minutos)
 		// Como 5 minutos é muito longo para teste, vamos verificar se a goroutine
 		// foi iniciada corretamente verificando o status inicial
 		foundAuction, err := repo.FindAuctionById(ctx, auction.Id)
-		require.NoError(t, err)
+		if err != nil {
+			t.Fatalf("Unexpected error: %v", err)
+		}
 		assert.Equal(t, auction_entity.Active, foundAuction.Status,
 			"Auction should be Active with default duration")
 
