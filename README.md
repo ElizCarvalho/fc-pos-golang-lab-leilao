@@ -8,10 +8,9 @@ Sistema de leilões em Go com fechamento automático, API REST e testes de integ
 # 1. Subir ambiente
 make docker-up
 
-# 2. Testar API
+# 2. Testando a API
 
-### 2.1. Criar um leilão
-```bash
+## 2.1. Criar um leilão
 curl -X POST "http://localhost:8080/auction" \
   -H "Content-Type: application/json" \
   -d '{
@@ -20,24 +19,20 @@ curl -X POST "http://localhost:8080/auction" \
     "description": "iPhone 15 Pro Max 256GB, cor azul, lacrado, sem uso",
     "condition": 1
   }'
-```
 
-### 2.2. Listar leilões abertos
-
-```bash
+## 2.2. Listar leilões abertos
 curl "http://localhost:8080/auction?status=0"
-```
 
-### 2.3. Aguardar fechamento automático (5 minutos)
-
-```bash
-# Aguardar 5 minutos e verificar se fechou
+## 2.3. Aguardar fechamento automático (5 minutos)
 curl "http://localhost:8080/auction?status=1"
 
-# 3. Executar testes
+# 3. Executar testes unitários
+make test
+
+# 4. Executar testes de integração
 make test-integration
 
-# 4. Parar ambiente
+# 5. Parar ambiente
 make docker-down
 ```
 
@@ -52,40 +47,6 @@ make docker-down
 | POST | `/bid` | Criar lance |
 | GET | `/bid/:auctionId` | Listar lances de um leilão |
 | GET | `/user/:userId` | Buscar usuário por ID |
-
-### Valores Válidos
-
-**Condition (condição do produto):**
-
-- `1` = Novo (New)
-- `2` = Usado (Used)
-- `3` = Recondicionado (Refurbished)
-
-**Status do leilão:**
-
-- `0` = Aberto (Active)
-- `1` = Fechado (Completed)
-
-## ⚠️ Observações Importantes
-
-### Correção de Bug
-
-- **Problema**: O DTO original tinha validação `oneof=0 1 2` mas a entidade usa valores `1, 2, 3`
-- **Solução**: Corrigido DTO para `oneof=1 2 3` para alinhar com a entidade
-- **Impacto**: Agora a criação de leilões funciona corretamente
-
-### Fechamento Automático
-
-- Leilões fecham automaticamente após **5 minutos** (configurável via `AUCTION_DURATION`)
-- Verificação a cada **1 minuto** (configurável via `AUCTION_CHECK_INTERVAL`)
-- Para testar o fechamento, aguarde 5 minutos ou ajuste as variáveis de ambiente
-
-### Validações
-
-- **Descrição**: Mínimo 10 caracteres, máximo 200
-- **Categoria**: Mínimo 2 caracteres
-- **Nome do produto**: Mínimo 1 caractere
-- **Status**: Obrigatório na busca (0 ou 1)
 
 ## 🧪 Testes
 
