@@ -30,9 +30,9 @@ test: ## Roda os testes unitários
 	@echo "$(BLUE)🧪 Executando testes unitários...$(NC)"
 	@go test -v ./...
 
-test-integration: ## Roda os testes de integração
+test-integration: ## Roda os testes de integração com MongoDB temporário
 	@echo "$(BLUE)🧪 Executando testes de integração...$(NC)"
-	@go test -v -tags=integration ./...
+	@./scripts/test-integration.sh
 
 test-coverage: ## Gera relatório de cobertura
 	@echo "$(BLUE)📊 Gerando relatório de cobertura...$(NC)"
