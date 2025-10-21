@@ -2,10 +2,11 @@ package bid_controller
 
 import (
 	"context"
-	"fullcycle-auction_go/configuration/rest_err"
+	"net/http"
+
+	"github.com/ElizCarvalho/fc-pos-golang-lab-leilao/configuration/rest_err"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"net/http"
 )
 
 func (u *BidController) FindBidByAuctionId(c *gin.Context) {

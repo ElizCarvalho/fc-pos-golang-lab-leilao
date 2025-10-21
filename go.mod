@@ -1,4 +1,4 @@
-module fullcycle-auction_go
+module github.com/ElizCarvalho/fc-pos-golang-lab-leilao
 
 go 1.20
 

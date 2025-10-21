@@ -2,20 +2,21 @@ package main
 
 import (
 	"context"
-	"fullcycle-auction_go/configuration/database/mongodb"
-	"fullcycle-auction_go/internal/infra/api/web/controller/auction_controller"
-	"fullcycle-auction_go/internal/infra/api/web/controller/bid_controller"
-	"fullcycle-auction_go/internal/infra/api/web/controller/user_controller"
-	"fullcycle-auction_go/internal/infra/database/auction"
-	"fullcycle-auction_go/internal/infra/database/bid"
-	"fullcycle-auction_go/internal/infra/database/user"
-	"fullcycle-auction_go/internal/usecase/auction_usecase"
-	"fullcycle-auction_go/internal/usecase/bid_usecase"
-	"fullcycle-auction_go/internal/usecase/user_usecase"
+	"log"
+
+	"github.com/ElizCarvalho/fc-pos-golang-lab-leilao/configuration/database/mongodb"
+	"github.com/ElizCarvalho/fc-pos-golang-lab-leilao/internal/infra/api/web/controller/auction_controller"
+	"github.com/ElizCarvalho/fc-pos-golang-lab-leilao/internal/infra/api/web/controller/bid_controller"
+	"github.com/ElizCarvalho/fc-pos-golang-lab-leilao/internal/infra/api/web/controller/user_controller"
+	"github.com/ElizCarvalho/fc-pos-golang-lab-leilao/internal/infra/database/auction"
+	"github.com/ElizCarvalho/fc-pos-golang-lab-leilao/internal/infra/database/bid"
+	"github.com/ElizCarvalho/fc-pos-golang-lab-leilao/internal/infra/database/user"
+	"github.com/ElizCarvalho/fc-pos-golang-lab-leilao/internal/usecase/auction_usecase"
+	"github.com/ElizCarvalho/fc-pos-golang-lab-leilao/internal/usecase/bid_usecase"
+	"github.com/ElizCarvalho/fc-pos-golang-lab-leilao/internal/usecase/user_usecase"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
-	"log"
 )
 
 func main() {

@@ -2,14 +2,15 @@ package bid
 
 import (
 	"context"
-	"fullcycle-auction_go/configuration/logger"
-	"fullcycle-auction_go/internal/entity/auction_entity"
-	"fullcycle-auction_go/internal/entity/bid_entity"
-	"fullcycle-auction_go/internal/infra/database/auction"
-	"fullcycle-auction_go/internal/internal_error"
 	"os"
 	"sync"
 	"time"
+
+	"github.com/ElizCarvalho/fc-pos-golang-lab-leilao/configuration/logger"
+	"github.com/ElizCarvalho/fc-pos-golang-lab-leilao/internal/entity/auction_entity"
+	"github.com/ElizCarvalho/fc-pos-golang-lab-leilao/internal/entity/bid_entity"
+	"github.com/ElizCarvalho/fc-pos-golang-lab-leilao/internal/infra/database/auction"
+	"github.com/ElizCarvalho/fc-pos-golang-lab-leilao/internal/internal_error"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )
