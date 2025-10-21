@@ -28,7 +28,7 @@ run: ## Roda a aplicação
 
 test: ## Roda os testes unitários
 	@echo "$(BLUE)🧪 Executando testes unitários...$(NC)"
-	@go test -v ./...
+	@go test -v -short ./...
 
 test-integration: ## Roda os testes de integração com MongoDB temporário
 	@echo "$(BLUE)🧪 Executando testes de integração...$(NC)"
