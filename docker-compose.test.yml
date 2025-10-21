@@ -1,0 +1,14 @@
+services:
+  mongodb-test:
+    image: mongo:latest
+    container_name: mongodb-test
+    ports:
+      - "27018:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=test_auctions
+    networks:
+      - test-network
+
+networks:
+  test-network:
+    driver: bridge
