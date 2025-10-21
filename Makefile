@@ -34,18 +34,13 @@ test-integration: ## Roda os testes de integração com MongoDB temporário
 	@echo "$(BLUE)🧪 Executando testes de integração...$(NC)"
 	@./scripts/test-integration.sh
 
-test-coverage: ## Gera relatório de cobertura
-	@echo "$(BLUE)📊 Gerando relatório de cobertura...$(NC)"
-	@go test -coverprofile=coverage.out ./...
-	@go tool cover -html=coverage.out -o coverage.html
-	@echo "$(GREEN)✅ Relatório gerado: coverage.html$(NC)"
 
 # ==============================================================================
 # Comandos Docker
 # ==============================================================================
 docker-up: ## Sobe o ambiente com Docker Compose
 	@echo "$(BLUE)🐳 Subindo ambiente completo...$(NC)"
-	@docker-compose up --build
+	@docker-compose up --build -d
 
 docker-down: ## Para o ambiente Docker Compose
 	@echo "$(BLUE)🐳 Parando ambiente...$(NC)"
@@ -57,7 +52,6 @@ docker-down: ## Para o ambiente Docker Compose
 clean: ## Limpa arquivos temporários
 	@echo "$(BLUE)🧹 Limpando arquivos temporários...$(NC)"
 	@go clean
-	@rm -f coverage.out coverage.html
 	@rm -f auction
 
 # ==============================================================================
