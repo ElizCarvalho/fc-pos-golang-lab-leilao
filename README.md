@@ -32,7 +32,6 @@ make docker-down
 ```bash
 make test              # Testes unitários
 make test-integration  # Testes de integração (MongoDB temporário)
-make test-coverage     # Cobertura de código
 ```
 
 ## 🏗️ Arquitetura
